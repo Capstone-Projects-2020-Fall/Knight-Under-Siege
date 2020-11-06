@@ -4,11 +4,8 @@ using UnityEngine;
 using Photon.Pun;
 using System.IO;
 
-[RequireComponent(typeof(Rigidbody2D))]
+
 [RequireComponent(typeof(PhotonView))]
-[RequireComponent(typeof(PhotonTransformView))]
-[RequireComponent(typeof(SpriteRenderer))]
-[RequireComponent(typeof(BoxCollider2D))]
 public class NecromancerController : MonoBehaviour
 {
     public float speed;
@@ -25,6 +22,7 @@ public class NecromancerController : MonoBehaviour
     private Camera camera;
     private Vector2 velocity;
     private Vector2 spawnPosition;
+    public GameObject spawnMarker;
 
     // Start is called before the first frame update
     void Start()
@@ -38,6 +36,7 @@ public class NecromancerController : MonoBehaviour
         //camera = GameObject.Find("Main Camera").GetComponent<Camera>();
         manaMiniBar = (NecromancerMana)GameObject.Find("Mana Bar Mini").GetComponent("NecromancerMana");
         manaMiniBar.SetMana(mana);
+        markSpawnLocations();
     }
 
     // Update is called once per frame
@@ -71,34 +70,7 @@ public class NecromancerController : MonoBehaviour
                 input.y = -1;
             }
             velocity = input.normalized * speed;
-            /*
-            //movement.x = Input.GetAxisRaw("Horizontal");
-            //movement.y = Input.GetAxisRaw("Vertical");
 
-            movement.x = 0;
-            movement.y = 0;
-
-            //check for horizontal movement
-            if(KeyBindingManager.GetKey(KeyAction.right) && !KeyBindingManager.GetKey(KeyAction.left))
-            {
-                movement.x = 1;
-            }
-
-            if(KeyBindingManager.GetKey(KeyAction.left) && !KeyBindingManager.GetKey(KeyAction.right))
-            {
-                movement.x = -1;
-            }
-
-            //check for vertical movement    
-            if(KeyBindingManager.GetKey(KeyAction.up) && !KeyBindingManager.GetKey(KeyAction.down))
-            {
-                movement.y = 1;
-            }
-
-            if(KeyBindingManager.GetKey(KeyAction.down) && !KeyBindingManager.GetKey(KeyAction.up))
-            {
-                movement.y = -1;
-            }*/
 
             //TODO: Replace this with UI button after spawn positions have been implemented
             if (KeyBindingManager.GetKeyDown(KeyAction.fire1))
@@ -139,6 +111,18 @@ public class NecromancerController : MonoBehaviour
         //camera.transform.Translate(movement * speed * Time.fixedDeltaTime);
     }
 
+    /// <summary>
+    /// Adds a small particle effect for the necromancer to mark where spawn locations are
+    /// </summary>
+    private void markSpawnLocations()
+    {
+        GameObject[] spawnLocations = GameObject.FindGameObjectsWithTag("Spawn Point");
+        foreach (GameObject spawn in spawnLocations)
+        {
+            Instantiate(spawnMarker, spawn.transform);
+        }
+    }
+
     //TODO: Add additional methods for all minions
 
     /// <summary>
@@ -159,59 +143,4 @@ public class NecromancerController : MonoBehaviour
             }
         }
     }
-    /*private int GetSpawnLocation(){
-        if(AtSpawnPoint){
-            if(SpawnName == "Vent 1"){
-                Debug.Log("In " + SpawnName);
-                SpawnPoint = 0;
-            }
-            if(SpawnName == "Vent 2"){
-                Debug.Log("In " + SpawnName);
-                SpawnPoint = 1;
-            }
-            if(SpawnName == "Vent 3"){
-                Debug.Log("In " + SpawnName);
-                SpawnPoint = 2;
-            }
-            if(SpawnName == "Vent 4"){
-                Debug.Log("In " + SpawnName);
-                SpawnPoint = 3;
-            }
-            if(SpawnName == "Vent 5"){
-                Debug.Log("In " + SpawnName);
-                SpawnPoint = 4;
-            }
-            if(SpawnName == "Vent 6"){
-                Debug.Log("In " + SpawnName);
-                SpawnPoint = 5;
-            }
-            if(SpawnName == "Vent 7"){
-                Debug.Log("In " + SpawnName);
-                SpawnPoint = 6;
-            }
-            if(SpawnName == "Vent 8"){
-                Debug.Log("In " + SpawnName);
-                SpawnPoint = 7;
-            }
-        }
-        return SpawnPoint;
-    }
-    private void OnTriggerEnter2D(Collider2D collider)
-    {
-        if (collider.gameObject.CompareTag("Spawn Point"))
-        {
-            Debug.Log("Necromancer entered" + collider.name);
-            SpawnName = collider.name;
-            //AtSpawnPoint = true;
-        }
-    }
-
-    private void OnTriggerExit2D(Collider2D collider)
-    {
-        if (collider.gameObject.CompareTag("Spawn Point"))
-        {
-            Debug.Log("Necromancer exited " + collider.name);
-            //AtSpawnPoint = false;
-        }
-    }*/
 }
