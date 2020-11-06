@@ -14,10 +14,13 @@ public abstract class MultiplayerMinion : MonoBehaviour
     public float speed;
     public float health;
     public float attackRange;
+    private KillCounter killCounter;
+    
 
     public void Start()
     {
         FindAllTargets();
+        killCounter = GameObject.FindWithTag("Kill Counter").GetComponent<KillCounter>();
     }
 
     public void FixedUpdate()
@@ -107,6 +110,7 @@ public abstract class MultiplayerMinion : MonoBehaviour
             health--;
             if (health <= 0)
             {
+                killCounter.IncreaseKillCount();
                 Die();
             }
         }

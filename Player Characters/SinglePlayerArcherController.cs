@@ -10,6 +10,7 @@ public class SinglePlayerArcherController : MonoBehaviour
     public float speed = 5f;
     //public float health = 5f;
     public float projectileForce = 20f;
+    private int totalKillCount = 0;
     private Rigidbody2D rb;
     private Vector2 movement;
     public GameObject firePoint;
@@ -30,11 +31,24 @@ public class SinglePlayerArcherController : MonoBehaviour
 
     void Update()
     {
-
         cdShoot +=Time.deltaTime;
         cdVolley +=Time.deltaTime;
 
-        movement.x = 0;
+        movement.x = Input.GetAxisRaw("Horizontal");
+        movement.y = Input.GetAxisRaw("Vertical");
+
+        if ((Input.GetButtonDown("Fire1") && Time.timeScale > 0))
+        { 
+            ShootProjectile();
+            cdShoot = 0f;
+        }
+        if ((Input.GetButtonDown("Fire2") && Time.timeScale > 0 && cdVolley > 1f ))
+        { 
+            ArrowVolley();
+            cdVolley = 0f;
+        }
+
+        /*movement.x = 0;
         movement.y = 0;
 
         //check for horizontal movement
@@ -79,7 +93,7 @@ public class SinglePlayerArcherController : MonoBehaviour
             } else {
                 Time.timeScale = 0;
             }
-        }
+        }*/
     }
 
     void FixedUpdate()
@@ -88,8 +102,13 @@ public class SinglePlayerArcherController : MonoBehaviour
        
 
         //If's to flip the archer facing left and right
-        if (KeyBindingManager.GetKey(KeyAction.right) && facingRight == false)
-        {
+        if (Input.GetKey(KeyCode.RightArrow) && facingRight == false){
+            FlipLeftRight();
+        }
+        if (Input.GetKey(KeyCode.LeftArrow) && facingRight == true){
+            FlipLeftRight();
+        }
+        /*if (KeyBindingManager.GetKey(KeyAction.right) && facingRight == false){
             FlipLeftRight();
         }
         if (KeyBindingManager.GetKey(KeyAction.left) && facingRight == true){
@@ -112,7 +131,7 @@ public class SinglePlayerArcherController : MonoBehaviour
         if (KeyBindingManager.GetKey(KeyAction.down) && shootingDirection != 4)
         {
             FlipTopBottom(4);
-        }
+        }*/
     }
 
     void FlipLeftRight()
@@ -154,7 +173,6 @@ public class SinglePlayerArcherController : MonoBehaviour
 
     void ArrowVolley()
     {
-
         Instantiate (projectilePrefab, shootDirection1.position, shootDirection1.rotation);
         Instantiate (projectilePrefab, shootDirection2.position, shootDirection2.rotation);
         Instantiate (projectilePrefab, shootDirection3.position, shootDirection3.rotation);

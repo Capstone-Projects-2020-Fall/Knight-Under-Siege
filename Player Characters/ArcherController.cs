@@ -61,8 +61,9 @@ public class ArcherController : MonoBehaviour
             }
 
             velocity = input.normalized * speed;
-            if (KeyBindingManager.GetKeyDown(KeyAction.fire1) && Time.timeScale > 0) pv.RPC("RPC_ShootProjectile", RpcTarget.All, Camera.main.ScreenToWorldPoint(Input.mousePosition));
-
+            if (KeyBindingManager.GetKeyDown(KeyAction.fire1) && Time.timeScale > 0){
+                pv.RPC("RPC_ShootProjectile", RpcTarget.All, Camera.main.ScreenToWorldPoint(Input.mousePosition));
+            }
         }
 
     }
