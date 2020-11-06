@@ -44,17 +44,24 @@ public class GameSetupController : MonoBehaviour
                 hero = PhotonNetwork.Instantiate(Path.Combine("PhotonPrefabs", "PhotonNecromancer"), Vector3.zero, Quaternion.identity);
                 break;
         }
+        try
+        {
+            if (FriendlyFire)
+            {
+                Hero heroScript = hero.GetComponent(typeof(Hero)) as Hero;
+                heroScript.FriendlyFire = true;
+            }
+            else
+            {
+                Hero heroScript = hero.GetComponent(typeof(Hero)) as Hero;
+                heroScript.FriendlyFire = false;
+            }
+        }
+        catch
+        {
+            Debug.Log("Unable to set FriendlyFire. Is this the necromancer?");
+        }
 
-        if (FriendlyFire)
-        {
-            Hero heroScript = hero.GetComponent(typeof(Hero)) as Hero;
-            heroScript.FriendlyFire = true;
-        }
-        else
-        {
-            Hero heroScript = hero.GetComponent(typeof(Hero)) as Hero;
-            heroScript.FriendlyFire = false;
-        }
 
         /*
         if (PhotonNetwork.IsMasterClient)
