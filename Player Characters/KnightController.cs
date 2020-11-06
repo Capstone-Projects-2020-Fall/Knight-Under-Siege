@@ -96,15 +96,12 @@ public class KnightController : MonoBehaviour
     /// </summary>
     public void Taunt()
     {
-        Debug.Log("Taunt");
         if (tauntReady)
         {
             GetComponent<Knight>().activateTaunt();
             tauntReady = false;
             StartCoroutine("endTauntCooldown");
-
         }
-
     }
 
 
