@@ -68,8 +68,6 @@ public class KnightController : MonoBehaviour
 
             velocity = input.normalized * speed;
             if (KeyBindingManager.GetKeyDown(KeyAction.fire1) && Time.timeScale > 0) SwingSword();
-
-            //TODO: Fix ability1 keyaction
             if (KeyBindingManager.GetKeyDown(KeyAction.ability1) && Time.timeScale > 0) Taunt();
         }
     }

@@ -11,13 +11,13 @@ public class NecromancerController : MonoBehaviour
     public float speed;
     private PhotonView pv;
     private bool manaIncreasing;
-    public float mana =100;
-    private float skeletonCost;
+    public float mana;
+    public float skeletonCost;
     private float startTime;
     private bool AtSpawnPoint = false;
     private string SpawnName;
     private int SpawnPoint; 
-    private Rigidbody2D rb;
+
     private NecromancerMana manaMiniBar;
     private Camera camera;
     private Vector2 velocity;
@@ -27,16 +27,16 @@ public class NecromancerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
         pv = GetComponent<PhotonView>();
-        skeletonCost = 5;
+        skeletonCost = 2;
         mana = 100;
         startTime = Time.time;
         manaIncreasing = true;
-        //camera = GameObject.Find("Main Camera").GetComponent<Camera>();
+        camera = GameObject.Find("Main Camera").GetComponent<Camera>();
         manaMiniBar = (NecromancerMana)GameObject.Find("Mana Bar Mini").GetComponent("NecromancerMana");
         manaMiniBar.SetMana(mana);
         markSpawnLocations();
+        
     }
 
     // Update is called once per frame
@@ -93,7 +93,7 @@ public class NecromancerController : MonoBehaviour
             {
                 if (mana < 100)
                 {
-                    mana = Mathf.Min(mana + 3*(Time.time - startTime), 100);
+                    mana = Mathf.Min(mana + 4*(Time.time - startTime), 100);
                     startTime = Time.time;
                     manaMiniBar.SetMana(mana);
                 }
@@ -107,8 +107,7 @@ public class NecromancerController : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        rb.MovePosition(rb.position + velocity * Time.fixedDeltaTime);
-        //camera.transform.Translate(movement * speed * Time.fixedDeltaTime);
+        camera.transform.Translate(velocity * speed * Time.fixedDeltaTime);
     }
 
     /// <summary>
