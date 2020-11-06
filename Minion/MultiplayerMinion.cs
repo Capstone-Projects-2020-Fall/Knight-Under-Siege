@@ -52,26 +52,29 @@ public abstract class MultiplayerMinion : MonoBehaviour
 
 
     /// <summary>
-    /// Checks through the list of targets and picks one based off of priority.
+    /// Checks through the list of targets and picks one based off of priority with a lower priority being preferred.
     /// </summary>
     /// <returns>A reference to the priority target.</returns>
     public GameObject PickTarget()
     {
         //TODO: Introduce weighted priority system
-        GameObject nearestTarget = null;
-        float nearestDistance = float.MaxValue;
+        GameObject priorityTarget = null;
+        float bestPriority = float.MaxValue;
 
         foreach (GameObject target in targets)
         {
             if (target == null) continue;
-            float currentDistance = Vector2.Distance(this.transform.position, target.transform.position);
-            if (currentDistance < nearestDistance)
+
+            /*attack priority = distance to target adjusted by target's personal priority*/
+            float currentPriority = target.GetComponent<Hero>().priority * Vector2.Distance(this.transform.position, target.transform.position);
+
+            if (currentPriority < bestPriority)
             {
-                nearestTarget = target;
-                nearestDistance = currentDistance;
+                priorityTarget = target;
+                bestPriority = currentPriority;
             }
         }
-        return nearestTarget;
+        return priorityTarget;
     }
 
     /// <summary>

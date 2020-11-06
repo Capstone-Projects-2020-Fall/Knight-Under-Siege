@@ -9,6 +9,7 @@ using System.IO;
 [RequireComponent(typeof(PhotonTransformView))]
 [RequireComponent(typeof(BoxCollider2D))]
 [RequireComponent(typeof(SpriteRenderer))]
+[RequireComponent(typeof(Knight))]
 public class KnightController : MonoBehaviour
 {
     public float speed;
@@ -22,6 +23,10 @@ public class KnightController : MonoBehaviour
     private PhotonView pv;
     private Vector2 velocity;
     public LayerMask enemyLayers;
+
+
+    public float tauntCooldownLength;
+    private bool tauntReady = true;
 
     // Start is called before the first frame update
     void Start()
@@ -63,6 +68,9 @@ public class KnightController : MonoBehaviour
 
             velocity = input.normalized * speed;
             if (KeyBindingManager.GetKeyDown(KeyAction.fire1) && Time.timeScale > 0) SwingSword();
+
+            //TODO: Fix ability1 keyaction
+            if (KeyBindingManager.GetKeyDown(KeyAction.ability1) && Time.timeScale > 0) Taunt();
         }
     }
     private void FixedUpdate()
@@ -81,13 +89,33 @@ public class KnightController : MonoBehaviour
         {
             Debug.Log("We hit" + enemy.name);
         }
+    }
+
+    /// <summary>
+    /// Temporarily boosts the knight's target priority
+    /// </summary>
+    public void Taunt()
+    {
+        Debug.Log("Taunt");
+        if (tauntReady)
+        {
+            GetComponent<Knight>().activateTaunt();
+            tauntReady = false;
+            StartCoroutine("endTauntCooldown");
+
+        }
+
+    }
 
 
-        /*
-        GameObject sword = PhotonNetwork.Instantiate(Path.Combine("PhotonPrefabs", "PhotonSword"), firePoint.position, firePoint.rotation);
-        Rigidbody2D rb = sword.GetComponent<Rigidbody2D>();
-        rb.AddForce(firePoint.right * projectileForce, ForceMode2D.Impulse);
-        */
+
+    /// <summary>
+    /// Re-enables the taunt ability after the set cooldown time has passed
+    /// </summary>
+    IEnumerator endTauntCooldown()
+    {
+        yield return new WaitForSeconds(tauntCooldownLength);
+        tauntReady = true;
     }
 
     private void OnDrawGizmosSelected()
