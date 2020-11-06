@@ -78,45 +78,9 @@ public class Hero : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (FriendlyFire)
+        if (collision.gameObject.CompareTag("Enemy") || (FriendlyFire && collision.gameObject.CompareTag("Projectile")))
         {
-            Debug.Log("Friendly Fire on");
-            if (collision.gameObject.CompareTag("Enemy") || collision.gameObject.CompareTag("Projectile"))
-            {
-                health--;
-                
-
-
-            }
-        }
-        else
-        {
-            Debug.Log("Friendly Fire off");
-            if (collision.gameObject.CompareTag("Enemy"))
-            {
-                health--;
-                healthBar.SetHealth(health);
-
-                if (health <= 0)
-                {
-                    PhotonNetwork.Destroy(gameObject);
-                    if (GameObject.FindGameObjectWithTag("Player") == null)
-                    {
-                        Debug.Log("necromancer wins");
-                        //pv.RPC("RPC_NecromancerWin", RpcTarget.All);
-                        if (SceneManager.GetActiveScene().name != "SingleplayerGame")
-                        {
-                            PlayerPrefs.SetInt("HeroesWin", 0);
-                            PhotonNetwork.LoadLevel("EndScreen");
-                        }
-                    }
-                    else
-                    {
-                        Debug.Log(GameObject.FindGameObjectWithTag("Player").ToString());
-                    }
-                
-                }
-            }
+          takeDamage(1);
         }
     }
 }
