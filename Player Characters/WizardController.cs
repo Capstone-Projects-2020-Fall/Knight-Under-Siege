@@ -15,10 +15,14 @@ public class WizardController : MonoBehaviour
     public float projectileForce = 20f;
     public Transform firePoint;
     public GameObject projectile;
+    public GameObject blizzard;
+    public GameObject pauseMenu;
+    private GameObject clonePause;
 
     private Rigidbody2D rb;
     private PhotonView pv;
     private Vector2 velocity;
+    private bool paused;
 
 
     // Start is called before the first frame update
@@ -26,6 +30,7 @@ public class WizardController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         pv = GetComponent<PhotonView>();
+        paused = false;
     }
 
     // Update is called once per frame
@@ -37,30 +42,49 @@ public class WizardController : MonoBehaviour
             input.x = 0;
             input.y = 0;
 
-            //check for horizontal movement
-            if(KeyBindingManager.GetKey(KeyAction.right) && !KeyBindingManager.GetKey(KeyAction.left))
+            if (!paused)
             {
-                input.x = 1;
-            }
+                //check for horizontal movement
+                if (KeyBindingManager.GetKey(KeyAction.right) && !KeyBindingManager.GetKey(KeyAction.left))
+                {
+                    input.x = 1;
+                }
 
-            if(KeyBindingManager.GetKey(KeyAction.left) && !KeyBindingManager.GetKey(KeyAction.right))
-            {
-                input.x = -1;
-            }
+                if (KeyBindingManager.GetKey(KeyAction.left) && !KeyBindingManager.GetKey(KeyAction.right))
+                {
+                    input.x = -1;
+                }
 
-            //check for vertical movement    
-            if(KeyBindingManager.GetKey(KeyAction.up) && !KeyBindingManager.GetKey(KeyAction.down))
-            {
-                input.y = 1;
-            }
+                //check for vertical movement    
+                if (KeyBindingManager.GetKey(KeyAction.up) && !KeyBindingManager.GetKey(KeyAction.down))
+                {
+                    input.y = 1;
+                }
 
-            if(KeyBindingManager.GetKey(KeyAction.down) && !KeyBindingManager.GetKey(KeyAction.up))
-            {
-                input.y = -1;
+                if (KeyBindingManager.GetKey(KeyAction.down) && !KeyBindingManager.GetKey(KeyAction.up))
+                {
+                    input.y = -1;
+                }
+
+                if (KeyBindingManager.GetKeyDown(KeyAction.fire1) && Time.timeScale > 0) pv.RPC("RPC_ShootProjectile", RpcTarget.All, Camera.main.ScreenToWorldPoint(Input.mousePosition));
+                if (KeyBindingManager.GetKeyDown(KeyAction.ability1) && Time.timeScale > 0) pv.RPC("RPC_Blizzard", RpcTarget.All, Camera.main.ScreenToWorldPoint(Input.mousePosition));
             }
 
             velocity = input.normalized * speed;
-            if (KeyBindingManager.GetKeyDown(KeyAction.fire1) && Time.timeScale > 0) pv.RPC("RPC_ShootProjectile", RpcTarget.All, Camera.main.ScreenToWorldPoint(Input.mousePosition));
+
+            if (KeyBindingManager.GetKeyDown(KeyAction.pause))
+            {
+                if (paused)
+                {
+                    DestroyImmediate(clonePause, true);
+                    paused = false;
+                }
+                else
+                {
+                    clonePause = Instantiate(pauseMenu);
+                    paused = true;
+                }
+            }
         }
     }
     private void FixedUpdate()
@@ -80,5 +104,16 @@ public class WizardController : MonoBehaviour
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
         GameObject fireball = Instantiate(projectile, firePoint.position, Quaternion.Euler(0f, 0f, angle));
         fireball.GetComponent<Rigidbody2D>().velocity = direction * projectileForce;
+    }
+
+    /// <summary>
+    /// Create a blizzard at the given position.
+    /// </summary>
+    /// <param name="clickPosition">A Vector3 corresponding with the mouse position.</param>
+    [PunRPC]
+    void RPC_Blizzard(Vector3 clickPosition)
+    {
+        clickPosition.z = transform.position.z;
+        Instantiate(blizzard, clickPosition, Quaternion.identity);
     }
 }

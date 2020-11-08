@@ -9,10 +9,13 @@ public class Knight : Hero
     [HideInInspector]
     public bool tauntActive = false;
     public float priorityMin;
+    public GameObject pauseMenu;
+    private GameObject clonePause;
 
     public float tauntBoost;
     public float tauntDuration;
     public GameObject tauntParticles;
+    private bool paused;
 
     /// <summary>
     /// Adjust priority calculations to take the taunt boost into account for the duration

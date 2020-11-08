@@ -18,11 +18,14 @@ public class KnightController : MonoBehaviour
     public Transform attackPoint;
     public float attackRange = 0.5f;
     public Animator animator;
+    public GameObject pauseMenu;
+    private GameObject clonePause;
 
     private Rigidbody2D rb;
     private PhotonView pv;
     private Vector2 velocity;
     public LayerMask enemyLayers;
+    private bool paused;
 
 
     public float tauntCooldownLength;
@@ -33,6 +36,7 @@ public class KnightController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         pv = GetComponent<PhotonView>();
+        paused = false;
     }
 
     // Update is called once per frame
@@ -44,31 +48,49 @@ public class KnightController : MonoBehaviour
             input.x = 0;
             input.y = 0;
 
-            //check for horizontal movement
-            if(KeyBindingManager.GetKey(KeyAction.right) && !KeyBindingManager.GetKey(KeyAction.left))
+            if (!paused)
             {
-                input.x = 1;
-            }
+                //check for horizontal movement
+                if (KeyBindingManager.GetKey(KeyAction.right) && !KeyBindingManager.GetKey(KeyAction.left))
+                {
+                    input.x = 1;
+                }
 
-            if(KeyBindingManager.GetKey(KeyAction.left) && !KeyBindingManager.GetKey(KeyAction.right))
-            {
-                input.x = -1;
-            }
+                if (KeyBindingManager.GetKey(KeyAction.left) && !KeyBindingManager.GetKey(KeyAction.right))
+                {
+                    input.x = -1;
+                }
 
-            //check for vertical movement    
-            if(KeyBindingManager.GetKey(KeyAction.up) && !KeyBindingManager.GetKey(KeyAction.down))
-            {
-                input.y = 1;
-            }
+                //check for vertical movement    
+                if (KeyBindingManager.GetKey(KeyAction.up) && !KeyBindingManager.GetKey(KeyAction.down))
+                {
+                    input.y = 1;
+                }
 
-            if(KeyBindingManager.GetKey(KeyAction.down) && !KeyBindingManager.GetKey(KeyAction.up))
-            {
-                input.y = -1;
+                if (KeyBindingManager.GetKey(KeyAction.down) && !KeyBindingManager.GetKey(KeyAction.up))
+                {
+                    input.y = -1;
+                }
+
+                if (KeyBindingManager.GetKeyDown(KeyAction.fire1) && Time.timeScale > 0) SwingSword();
+                if (KeyBindingManager.GetKeyDown(KeyAction.ability1) && Time.timeScale > 0) Taunt();
             }
 
             velocity = input.normalized * speed;
-            if (KeyBindingManager.GetKeyDown(KeyAction.fire1) && Time.timeScale > 0) SwingSword();
-            if (KeyBindingManager.GetKeyDown(KeyAction.ability1) && Time.timeScale > 0) Taunt();
+
+            if (KeyBindingManager.GetKeyDown(KeyAction.pause))
+            {
+                if (paused)
+                {
+                    DestroyImmediate(clonePause, true);
+                    paused = false;
+                }
+                else
+                {
+                    clonePause = Instantiate(pauseMenu);
+                    paused = true;
+                }
+            }
         }
     }
     private void FixedUpdate()

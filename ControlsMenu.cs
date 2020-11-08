@@ -26,15 +26,25 @@ public class ControlsMenu : MonoBehaviour
         {
             if(active == false)
             {
-                Panel.gameObject.SetActive(true);
-                active = true;
+                setActiveTrue();
             }
             else
             {
-                Panel.gameObject.SetActive(false);
-                active = false;
+                setActiveFalse();
             }
         }
+    }
+
+    public void setActiveFalse()
+    {
+        Panel.gameObject.SetActive(false);
+        active = false;
+    }
+
+    public void setActiveTrue()
+    {
+        Panel.gameObject.SetActive(true);
+        active = true;
     }
 
     

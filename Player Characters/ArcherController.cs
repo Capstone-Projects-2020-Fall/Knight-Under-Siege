@@ -15,11 +15,13 @@ public class ArcherController : MonoBehaviour
     public float projectileForce = 20f;
     public Transform firePoint;
     public GameObject projectile;
+    public GameObject pauseMenu;
+    private GameObject clonePause;
 
     private Rigidbody2D rb;
     private PhotonView pv;
     private Vector2 velocity;
-
+    private bool paused;
 
 
     // Start is called before the first frame update
@@ -27,6 +29,7 @@ public class ArcherController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         pv = GetComponent<PhotonView>();
+        paused = false;
     }
 
     // Update is called once per frame
@@ -38,32 +41,53 @@ public class ArcherController : MonoBehaviour
             input.x = 0;
             input.y = 0;
 
-            //check for horizontal movement
-            if(KeyBindingManager.GetKey(KeyAction.right) && !KeyBindingManager.GetKey(KeyAction.left))
+            if (!paused)
             {
-                input.x = 1;
-            }
+                //check for horizontal movement
+                if (KeyBindingManager.GetKey(KeyAction.right) && !KeyBindingManager.GetKey(KeyAction.left))
+                {
+                    input.x = 1;
+                }
 
-            if(KeyBindingManager.GetKey(KeyAction.left) && !KeyBindingManager.GetKey(KeyAction.right))
-            {
-                input.x = -1;
-            }
+                if (KeyBindingManager.GetKey(KeyAction.left) && !KeyBindingManager.GetKey(KeyAction.right))
+                {
+                    input.x = -1;
+                }
 
-            //check for vertical movement    
-            if(KeyBindingManager.GetKey(KeyAction.up) && !KeyBindingManager.GetKey(KeyAction.down))
-            {
-                input.y = 1;
-            }
-            
-            if(KeyBindingManager.GetKey(KeyAction.down) && !KeyBindingManager.GetKey(KeyAction.up))
-            {
-                input.y = -1;
+                //check for vertical movement    
+                if (KeyBindingManager.GetKey(KeyAction.up) && !KeyBindingManager.GetKey(KeyAction.down))
+                {
+                    input.y = 1;
+                }
+
+                if (KeyBindingManager.GetKey(KeyAction.down) && !KeyBindingManager.GetKey(KeyAction.up))
+                {
+                    input.y = -1;
+                }
+
+                if (KeyBindingManager.GetKeyDown(KeyAction.fire1) && Time.timeScale > 0)
+                {
+                    pv.RPC("RPC_ShootProjectile", RpcTarget.All, Camera.main.ScreenToWorldPoint(Input.mousePosition));
+                }
             }
 
             velocity = input.normalized * speed;
-            if (KeyBindingManager.GetKeyDown(KeyAction.fire1) && Time.timeScale > 0){
-                pv.RPC("RPC_ShootProjectile", RpcTarget.All, Camera.main.ScreenToWorldPoint(Input.mousePosition));
+
+            if (KeyBindingManager.GetKeyDown(KeyAction.pause))
+            {
+                if (paused)
+                {
+                    DestroyImmediate(clonePause, true);
+                    paused = false;
+                }
+                else
+                {
+                    clonePause = Instantiate(pauseMenu);
+                    paused = true;
+                }
             }
+
+            
         }
 
     }
