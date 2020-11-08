@@ -1,7 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
+using Photon.Realtime;
 
 
 [RequireComponent(typeof(Rigidbody2D))]
@@ -12,13 +14,19 @@ public abstract class MultiplayerMinion : MonoBehaviour
 {
     GameObject[] targets;
     public float speed;
+    public float speedScalar;
     public float health;
     public float attackRange;
     private KillCounter killCounter;
+
+    private bool facingRight = true;
+    private float prevX;
     
 
     public void Start()
     {
+        speedScalar = Convert.ToSingle(PhotonNetwork.CurrentRoom.CustomProperties["Minion Speed"]);
+        prevX = transform.position.x;
         FindAllTargets();
         killCounter = GameObject.FindWithTag("Kill Counter").GetComponent<KillCounter>();
     }
@@ -33,7 +41,8 @@ public abstract class MultiplayerMinion : MonoBehaviour
         if (distanceToTarget <= attackRange)
         {
             Attack();
-        } else
+        }
+        else
         {
             MoveTo(currentTarget);
         }
@@ -87,8 +96,28 @@ public abstract class MultiplayerMinion : MonoBehaviour
     public void MoveTo(GameObject target)
     {
         //TODO: Introduce pathfinding
-        float step = speed * Time.deltaTime;
+        float step = speed * speedScalar * Time.deltaTime;
         transform.position = Vector2.MoveTowards(transform.position, target.transform.position, step);
+
+        /*If we're facing right and going left OR facing left and going right then flip the character*/
+        if ((facingRight && prevX > transform.position.x) || (!facingRight && prevX < transform.position.x)) flip();
+
+        prevX = transform.position.x;
+    }
+
+    /// <summary>
+    /// Reduces the minion's health by the specified amount of damage then kills them if their health is at or below 0.
+    /// </summary>
+    /// <param name="damage">The amount of damage done.</param>
+    [PunRPC]
+    public void takeDamage(float damage)
+    {
+        health -= damage;
+        if (health <= 0)
+        {
+            killCounter.IncreaseKillCount();
+            Die();
+        }
     }
 
     /// <summary>
@@ -100,19 +129,24 @@ public abstract class MultiplayerMinion : MonoBehaviour
     }
 
     /// <summary>
+    /// Flip the character along the x-axis so they face the opposite direction.
+    /// </summary>
+    private void flip()
+    {
+        facingRight = !facingRight;
+        Vector3 flippedScale = transform.localScale;
+        flippedScale.x *= -1;
+        transform.localScale = flippedScale;
+    }
+
+    /// <summary>
     /// A listener for gameobjects colliding with this minion.
     /// </summary>
     /// <param name="collision">A system-provided Collider2D object.</param>
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.CompareTag("Projectile"))
-        {
-            health--;
-            if (health <= 0)
-            {
-                killCounter.IncreaseKillCount();
-                Die();
-            }
-        }
+        GameObject collidingObject = collision.gameObject;
+        
+        if (collidingObject.CompareTag("Projectile")) takeDamage(collidingObject.GetComponent<Projectile>().damage);
     }
 }

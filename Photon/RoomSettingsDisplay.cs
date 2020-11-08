@@ -91,12 +91,20 @@ public class RoomSettingsDisplay : MonoBehaviourPunCallbacks
                         displayedSetting.settingName.text = "Friendly Fire: Off";
                     }
                 }
+                else if (pair.Key.ToString() == "Player Health")
+                {
+                    displayedSetting.settingName.text = "" + pair.Key + ": " + pair.Value.ToString();
+                }
+                else if (pair.Key.ToString() == "Minion Speed")
+                {
+                    displayedSetting.settingName.text = "" + pair.Key + ": " + pair.Value.ToString() + "x";
+                }
                 else
                 {
                     Debug.Log("" + pair.Key + " is not accounted for.");
                     //displayedSetting.settingName.text = "" + pair.Key + ": " + pair.Value.ToString();
                 }
-                newSetting.transform.parent = content.transform;
+                newSetting.transform.SetParent(content.transform, false);
             }
         }
     }

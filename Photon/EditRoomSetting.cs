@@ -17,9 +17,13 @@ public class EditRoomSetting : MonoBehaviour
 
     private string[] timerOptions;
     private string[] friendlyFireOptions;
+    private string[] playerHealthOptions;
+    private string[] minionSpeedOptions;
 
     private int timerIndex;
     private int friendlyFireIndex;
+    private int playerHealthIndex;
+    private int minionSpeedIndex;
     
     private Room room;
 
@@ -32,18 +36,25 @@ public class EditRoomSetting : MonoBehaviour
         
         timerOptions = new string[] {"10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "1:00", "2:00", "3:00", "4:00", "5:00", "6:00", "7:00", "8:00", "9:00"};
         friendlyFireOptions = new string[] {"Off", "On"};
+        playerHealthOptions = new string[] {"5", "6", "7", "8", "9", "10", "1", "2", "3", "4"};
+        minionSpeedOptions = new string[] {"1x", "1.25x", "1.5x", "1.75x", "2x", "0.25x", "0.5x", "0.75x"};
 
         if (arrayNumber == 0)
         {
             timerIndex = Math.Max(Array.IndexOf(timerOptions, valueText.text), 0);
         }
-        else
+        else if(arrayNumber == 1)
         {
             friendlyFireIndex = Math.Max(Array.IndexOf(friendlyFireOptions, valueText.text), 0);
         }
-        
-        timerIndex = 0;
-        friendlyFireIndex = 0;
+        else if (arrayNumber == 2)
+        {
+            timerIndex = Math.Max(Array.IndexOf(playerHealthOptions, valueText.text), 0);
+        }
+        else
+        {
+            minionSpeedIndex = Math.Max(Array.IndexOf(minionSpeedOptions, valueText.text), 0);
+        }
     }
 
     // Update is called once per frame
@@ -75,6 +86,26 @@ public class EditRoomSetting : MonoBehaviour
 
         room.SetCustomProperties(ht);
     }
+    
+    private void changePlayerHealthSettings()
+    {
+        float health = Convert.ToSingle(valueText.text);
+        
+        ExitGames.Client.Photon.Hashtable ht = new ExitGames.Client.Photon.Hashtable();
+        ht.Add("Player Health", health);
+
+        room.SetCustomProperties(ht);
+    }
+    
+    private void changeMinionSpeedSettings()
+    {
+        float speed = Convert.ToSingle(valueText.text.Substring(0, valueText.text.Length - 1));
+        
+        ExitGames.Client.Photon.Hashtable ht = new ExitGames.Client.Photon.Hashtable();
+        ht.Add("Minion Speed", speed);
+
+        room.SetCustomProperties(ht);
+    }
 
     public void Plus()
     {
@@ -92,7 +123,7 @@ public class EditRoomSetting : MonoBehaviour
             valueText.text = timerOptions[timerIndex];
             changeTimerSettings();
         }
-        else
+        else if(arrayNumber == 1)
         {
             if (friendlyFireIndex == friendlyFireOptions.Length - 1)
             {
@@ -105,6 +136,34 @@ public class EditRoomSetting : MonoBehaviour
 
             valueText.text = friendlyFireOptions[friendlyFireIndex];
             changeFriendlyFireSettings();
+        }
+        else if (arrayNumber == 2)
+        {
+            if (playerHealthIndex == playerHealthOptions.Length - 1)
+            {
+                playerHealthIndex = 0;
+            }
+            else
+            {
+                playerHealthIndex++;
+            }
+
+            valueText.text = playerHealthOptions[playerHealthIndex];
+            changePlayerHealthSettings();
+        }
+        else //if (arrayNumber == 3)
+        {
+            if (minionSpeedIndex == minionSpeedOptions.Length - 1)
+            {
+                minionSpeedIndex = 0;
+            }
+            else
+            {
+                minionSpeedIndex++;
+            }
+
+            valueText.text = minionSpeedOptions[minionSpeedIndex];
+            changeMinionSpeedSettings();
         }
     }
     
@@ -124,7 +183,7 @@ public class EditRoomSetting : MonoBehaviour
             valueText.text = timerOptions[timerIndex];
             changeTimerSettings();
         }
-        else
+        else if (arrayNumber == 1)
         {
             if (friendlyFireIndex == 0)
             {
@@ -137,6 +196,34 @@ public class EditRoomSetting : MonoBehaviour
 
             valueText.text = friendlyFireOptions[friendlyFireIndex];
             changeFriendlyFireSettings();
+        }
+        else if (arrayNumber == 2)
+        {
+            if (playerHealthIndex == 0)
+            {
+                playerHealthIndex = playerHealthOptions.Length - 1;
+            }
+            else
+            {
+                playerHealthIndex--;
+            }
+
+            valueText.text = playerHealthOptions[playerHealthIndex];
+            changePlayerHealthSettings();
+        }
+        else //if (arrayNumber == 3)
+        {
+            if (minionSpeedIndex == 0)
+            {
+                minionSpeedIndex = minionSpeedOptions.Length - 1;
+            }
+            else
+            {
+                minionSpeedIndex--;
+            }
+
+            valueText.text = minionSpeedOptions[minionSpeedIndex];
+            changeMinionSpeedSettings();
         }
     }
 }

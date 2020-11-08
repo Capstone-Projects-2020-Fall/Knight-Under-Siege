@@ -1,4 +1,5 @@
 ﻿using Photon.Pun;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -28,15 +29,19 @@ public class Hero : MonoBehaviour
     {
         pv = GetComponent<PhotonView>();
         healthBar = (HeroHealth)GameObject.Find("Health Bar").GetComponent("HeroHealth");
-        healthBar.SetHealth(health);
+
+        health = Convert.ToSingle(PhotonNetwork.CurrentRoom.CustomProperties["Player Health"]);
+
+        healthBar.SetStartingHealth(health);
         maxHealth = health;
 
     }
-    [PunRPC]
+    
+    /*[PunRPC]
     private void RPC_NecromancerWin()
     {
         SceneManager.LoadScene("Defeat");
-    }
+    }*/
 
     /// <summary>
     /// Adjust the characters health according to the amount of damage taken
@@ -54,11 +59,8 @@ public class Hero : MonoBehaviour
             {
                 Debug.Log("necromancer wins");
                 //pv.RPC("RPC_NecromancerWin", RpcTarget.All);
-                if (SceneManager.GetActiveScene().name != "SingleplayerGame")
-                {
-                    PlayerPrefs.SetInt("HeroesWin", 0);
-                    PhotonNetwork.LoadLevel("EndScreen");
-                }
+                PlayerPrefs.SetInt("HeroesWin", 0);
+                PhotonNetwork.LoadLevel("EndScreen");
             }
             else
             {
