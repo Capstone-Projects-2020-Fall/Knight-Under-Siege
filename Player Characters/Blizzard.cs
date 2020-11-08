@@ -9,15 +9,20 @@ public class Blizzard : Projectile
     public float radius;
 
 
-    private void Start()
+    public void Start()
     {
         /*Default to these values if none have been set or given values don't make sense*/
-        if (damage < 0) damage = 0.0f;
+
         if (TimeToLive <= 0) TimeToLive = 5.0f;
-        if (radius <= 0) radius = 1.0f;
+        if (radius <= 0) radius = 0.5f;
 
         GetComponent<CircleCollider2D>().radius = radius;
         
         Destroy(gameObject, TimeToLive);
+    }
+
+    public void OnTriggerEnter2D(Collider2D collision)
+    {
+        /*Intentionally left blank*/
     }
 }

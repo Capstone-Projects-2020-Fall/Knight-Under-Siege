@@ -7,7 +7,7 @@ public class Projectile : MonoBehaviour
     public float TimeToLive;
     public float damage;
 
-    private void Start()
+    public void Start()
     {
         /*Default to these values if none have been set or given values don't make sense*/
         if (damage <= 0) damage = 1.0f;
@@ -16,7 +16,7 @@ public class Projectile : MonoBehaviour
         Destroy(gameObject, TimeToLive);
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    public void OnTriggerEnter2D(Collider2D collision)
     {
         //TODO: Include check for friendly fire
         if (collision.gameObject.CompareTag("Enemy") || collision.gameObject.CompareTag("Obstacle"))

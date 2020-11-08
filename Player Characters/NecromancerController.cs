@@ -83,7 +83,8 @@ public class NecromancerController : MonoBehaviour
 
             if (KeyBindingManager.GetKeyDown(KeyAction.pause)) pauseMenu.SetActive(!pauseMenu.activeSelf);
 
-            RecoverMana();
+            if (mana < maxMana) RecoverMana();
+            startTime = Time.time;
         }
 
     }
@@ -124,10 +125,9 @@ public class NecromancerController : MonoBehaviour
     /// </summary>
     public void RecoverMana()
     {
-        if (mana < maxMana) mana += manaRecoveredPerSecond * (Time.time - startTime);
+        mana += manaRecoveredPerSecond * (Time.time - startTime);
         if (mana > maxMana) mana = maxMana;
-
-        startTime = Time.time;
+   
         manaSlider.value = mana;
     }
 
