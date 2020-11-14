@@ -25,10 +25,8 @@ public abstract class MultiplayerMinion : MonoBehaviour
     /*Status Effects*/
     private bool frozen = false;
 
-
     public void Start()
     {
-
         speedScalar = Convert.ToSingle(PhotonNetwork.CurrentRoom.CustomProperties["Minion Speed"]);
         prevX = transform.position.x;
         FindAllTargets();
