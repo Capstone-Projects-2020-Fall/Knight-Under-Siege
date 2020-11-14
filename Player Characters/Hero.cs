@@ -1,4 +1,5 @@
 ﻿using Photon.Pun;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,7 +12,7 @@ public class Hero : MonoBehaviour
     public float maxHealth;
     public float mana;
     private HeroHealth healthBar;
-    private HeroHealth healthBarMini;
+    private HeroHealth miniHealthBar;
     private PhotonView pv;
 
 
@@ -28,14 +29,21 @@ public class Hero : MonoBehaviour
     {
         pv = GetComponent<PhotonView>();
         healthBar = (HeroHealth)GameObject.Find("Health Bar").GetComponent("HeroHealth");
-        healthBar.SetHealth(health);
+        miniHealthBar = (HeroHealth)GameObject.Find("Mini Health Bar").GetComponent("HeroHealth");
+
+        health = Convert.ToSingle(PhotonNetwork.CurrentRoom.CustomProperties["Player Health"]);
+
+        healthBar.SetStartingHealth(health);
+        miniHealthBar.SetStartingHealth(health);
         maxHealth = health;
 
     }
+    
     [PunRPC]
     private void RPC_NecromancerWin()
     {
-        SceneManager.LoadScene("Defeat");
+        PlayerPrefs.SetInt("HeroesWin", 0);
+        PhotonNetwork.LoadLevel("EndScreen");
     }
 
     /// <summary>
@@ -46,6 +54,7 @@ public class Hero : MonoBehaviour
     {
         health -= damage;
         healthBar.SetHealth(health);
+        miniHealthBar.SetHealth(health);
 
         if (health <= 0)
         {
@@ -53,12 +62,7 @@ public class Hero : MonoBehaviour
             if (GameObject.FindGameObjectWithTag("Player") == null)
             {
                 Debug.Log("necromancer wins");
-                //pv.RPC("RPC_NecromancerWin", RpcTarget.All);
-                if (SceneManager.GetActiveScene().name != "SingleplayerGame")
-                {
-                    PlayerPrefs.SetInt("HeroesWin", 0);
-                    PhotonNetwork.LoadLevel("EndScreen");
-                }
+                pv.RPC("RPC_NecromancerWin", RpcTarget.All);
             }
             else
             {
