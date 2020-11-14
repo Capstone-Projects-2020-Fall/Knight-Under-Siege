@@ -37,11 +37,12 @@ public class Hero : MonoBehaviour
 
     }
     
-    /*[PunRPC]
+    [PunRPC]
     private void RPC_NecromancerWin()
     {
-        SceneManager.LoadScene("Defeat");
-    }*/
+        PlayerPrefs.SetInt("HeroesWin", 0);
+        PhotonNetwork.LoadLevel("EndScreen");
+    }
 
     /// <summary>
     /// Adjust the characters health according to the amount of damage taken
@@ -58,9 +59,7 @@ public class Hero : MonoBehaviour
             if (GameObject.FindGameObjectWithTag("Player") == null)
             {
                 Debug.Log("necromancer wins");
-                //pv.RPC("RPC_NecromancerWin", RpcTarget.All);
-                PlayerPrefs.SetInt("HeroesWin", 0);
-                PhotonNetwork.LoadLevel("EndScreen");
+                pv.RPC("RPC_NecromancerWin", RpcTarget.All);
             }
             else
             {
