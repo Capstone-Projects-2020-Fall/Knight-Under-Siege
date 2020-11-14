@@ -1,0 +1,58 @@
+﻿using UnityEngine.Audio;
+using UnityEngine;
+using System;
+
+public class AudioManager : MonoBehaviour
+{
+
+    public static AudioManager instance;
+
+    public AudioMixerGroup mixer;
+
+    public Sound[] sounds;
+
+    // Start is called before the first frame update
+    void Awake()
+    {
+        if(instance == null){
+            instance = this;
+        }
+        else{
+            Destroy(gameObject);
+            return;
+        }
+
+        DontDestroyOnLoad(gameObject);
+
+        foreach(Sound s in sounds){
+            s.source = gameObject.AddComponent<AudioSource>();
+            s.source.clip = s.clip;
+
+            s.source.volume = s.volume;
+            s.source.pitch = s.pitch;
+            s.source.loop = s.loop;
+            s.source.outputAudioMixerGroup = mixer;
+        }
+    }
+
+    void Start()
+    {
+        Play("KUS_Main_Theme_Loop_1");
+    }
+
+    void Update()
+    {
+        //TODO: Update based on scene
+    }
+
+    public void Play(string name)
+    {
+        Sound s = Array.Find(sounds, sound => sound.name == name);
+        if(s == null){
+            Debug.Log("Cannot find source");
+            return;
+        }
+
+        s.source.Play();
+    }
+}
