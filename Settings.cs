@@ -18,30 +18,31 @@ public class Settings : MonoBehaviour
     void Start()
     {
         float curVolume = PlayerPrefs.GetFloat("SliderVolumeLevel");
-        UnityEngine.Debug.Log(curVolume);
         slider.value = curVolume;
 
         resolutions = Screen.resolutions;
 
-        resolutionDropdown.ClearOptions();
+        if(resolutionDropdown != null){
+            resolutionDropdown.ClearOptions();
 
-        List<string> options = new List<string>();
+            List<string> options = new List<string>();
 
-        int currentResolutionIndex = 0;
-        for(int i = 0; i< resolutions.Length; i++)
-        {
-            string option = resolutions[i].width + " x " + resolutions[i].height;
-            options.Add(option);
-
-            if(resolutions[i].width == Screen.currentResolution.width && resolutions[i].height == Screen.currentResolution.height)
+            int currentResolutionIndex = 0;
+            for(int i = 0; i< resolutions.Length; i++)
             {
-                currentResolutionIndex = i;
-            }
-        }
+                string option = resolutions[i].width + " x " + resolutions[i].height;
+                options.Add(option);
 
-        resolutionDropdown.AddOptions(options);
-        resolutionDropdown.value = currentResolutionIndex;
-        resolutionDropdown.RefreshShownValue();
+                if(resolutions[i].width == Screen.currentResolution.width && resolutions[i].height == Screen.currentResolution.height)
+                {
+                    currentResolutionIndex = i;
+                }
+            }
+
+            resolutionDropdown.AddOptions(options);
+            resolutionDropdown.value = currentResolutionIndex;
+            resolutionDropdown.RefreshShownValue();
+        }
     }
 
     public void SetVolume(float volume)
