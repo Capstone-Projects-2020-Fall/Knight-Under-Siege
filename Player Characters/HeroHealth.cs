@@ -14,8 +14,8 @@ public class HeroHealth : MonoBehaviour
    
    public void SetStartingHealth(float health)
    {
-       slider.value = health;
        slider.maxValue = health;
+       slider.value = health;
    }
 
 }
