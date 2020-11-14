@@ -21,7 +21,7 @@ public class SpawnPoint : MonoBehaviour {
     {
         if(Time.timeScale > 0)
         {
-            rand = Random.Range(0, SpawnLocations.Length);
+            rand = Random.Range(0, 4);
             Instantiate(Skelly, SpawnLocations[rand].transform.position, Quaternion.identity);
         }
     }

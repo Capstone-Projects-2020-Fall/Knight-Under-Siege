@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 
 
 [RequireComponent(typeof(Rigidbody2D))]
@@ -12,10 +13,13 @@ public abstract class Minion : MonoBehaviour
     public float speed;
     public float health;
     public float attackRange;
+    float currentHealth;
     // Start is called before the first frame update
     void Start()
     {
         FindAllTargets();
+
+        currentHealth = health;
     }
 
     // Update is called once per frame
@@ -90,7 +94,16 @@ public abstract class Minion : MonoBehaviour
     /// </summary>
     public void Die()
     {
-        Destroy(gameObject);
+       Destroy(gameObject);
+    }
+
+    public void TakeDamage(int damage)
+    {
+        currentHealth -= damage;
+        if (health <= 0)
+        {
+            PhotonNetwork.Destroy(gameObject);
+        }
     }
 
     /// <summary>

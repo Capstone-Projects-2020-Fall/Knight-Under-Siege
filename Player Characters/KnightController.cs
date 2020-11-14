@@ -20,6 +20,7 @@ public class KnightController : MonoBehaviour
     public Animator animator;
     public GameObject pauseMenu;
     private GameObject clonePause;
+    public int attackDamage = 1;
 
     private Rigidbody2D rb;
     private PhotonView pv;
@@ -107,7 +108,7 @@ public class KnightController : MonoBehaviour
 
         foreach(Collider2D enemy in hitEnemies)
         {
-            Debug.Log("We hit" + enemy.name);
+            enemy.GetComponent<MultiplayerMinion>().takeDamage(attackDamage);
         }
     }
 

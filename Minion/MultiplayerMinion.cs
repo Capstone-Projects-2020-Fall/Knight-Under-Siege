@@ -143,6 +143,15 @@ public abstract class MultiplayerMinion : MonoBehaviour
         GetComponent<SpriteRenderer>().color = Color.white;
     }
 
+    public void TakeDamage(int damage)
+    {
+       health -= damage;
+        if (health <= 0)
+        {
+            PhotonNetwork.Destroy(gameObject);
+        }
+    }
+
     /// <summary>
     /// Flip the character along the x-axis so they face the opposite direction.
     /// </summary>
