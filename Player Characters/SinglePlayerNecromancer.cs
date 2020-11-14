@@ -13,6 +13,7 @@ public class SinglePlayerNecromancer : MonoBehaviour
     private Rigidbody2D rb;
     private Vector2 movement;
 
+    public GameObject pause;
     
     private void Start()
     {
@@ -33,8 +34,10 @@ public class SinglePlayerNecromancer : MonoBehaviour
             if(Time.timeScale == 0)
             {
                 Time.timeScale = 1;
+                pause.gameObject.SetActive(false);
             } else {
                 Time.timeScale = 0;
+                pause.gameObject.SetActive(true);
             }
         }
     }
