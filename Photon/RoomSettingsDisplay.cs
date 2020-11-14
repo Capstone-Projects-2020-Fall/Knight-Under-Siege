@@ -91,13 +91,13 @@ public class RoomSettingsDisplay : MonoBehaviourPunCallbacks
                         displayedSetting.settingName.text = "Friendly Fire: Off";
                     }
                 }
-                else if (pair.Key.ToString() == "Player Health")
-                {
-                    displayedSetting.settingName.text = "" + pair.Key + ": " + pair.Value.ToString();
-                }
                 else if (pair.Key.ToString() == "Minion Speed")
                 {
                     displayedSetting.settingName.text = "" + pair.Key + ": " + pair.Value.ToString() + "x";
+                }
+                else if (pair.Key.ToString() == "Player Health" || pair.Key.ToString() == "Max Players")
+                {
+                    displayedSetting.settingName.text = "" + pair.Key + ": " + pair.Value.ToString();
                 }
                 else
                 {

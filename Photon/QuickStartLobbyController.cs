@@ -92,6 +92,9 @@ public class QuickStartLobbyController : MonoBehaviourPunCallbacks
                 ht.Add("Host", "Blank Name");
             }
             Debug.Log("Host: " + (ht["Host"] as string));
+
+			ht.Add("Max Players", 4);
+            Debug.Log("Max Players: " + (ht["Max Players"].ToString()));
             
             ht.Add("Timer Length", 600);
             Debug.Log("Timer Length: " + (ht["Timer Length"].ToString()));
