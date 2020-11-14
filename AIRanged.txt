@@ -1,0 +1,160 @@
+using UnityEngine;
+using Pathfinding;
+using System.Collections;
+using System.Collections.Generic;
+using Photon.Pun;
+
+public class AIRanged : MonoBehaviour
+{
+    public float speed;
+    private Rigidbody2D rb;
+    public float projectileForce = 20f;
+    public Transform firePoint;
+    public GameObject projectile;
+
+    //The distance we want to stop moving toward the target
+    public float stoppingDistance;
+
+    //The distance we want to run away from the target
+    public float retreatDistance;
+
+    //The rate of fire
+    private float timeBetweenShots;
+
+    //The time it takes to reload
+    public float startTimeBetweenShots;
+
+    //Target
+    private Transform target;
+
+    //How close the A.I. needs to be before it moves to the next way point
+    public float nextWaypointDistance = 3f;
+
+    //Current path that we are following
+    Path path;
+
+    // Current waypoint along the path it's on
+    int currentWaypoint = 0;
+
+    //if we reached the end of the path
+    bool reachedEndPath = false;
+    Seeker seeker;
+
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        rb = GetComponent<Rigidbody2D>();
+        seeker = GetComponent<Seeker>();
+
+        timeBetweenShots = startTimeBetweenShots;
+
+        //Updates the path to follow and target different enemies, functions called, time to wait to call, then the repeat rate
+        InvokeRepeating("UpdatePath", 0f, .5f);
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+
+    }
+
+    private void FixedUpdate()
+    {
+        target = GameObject.FindGameObjectWithTag("Enemy").transform;
+
+        //Checks to see if there's a path
+        if (path == null)
+            return;
+
+        //If we reached the goal then stop moving. 
+        if (currentWaypoint >= path.vectorPath.Count)
+        {
+            reachedEndPath = true;
+            return;
+        }
+        else
+        {
+            reachedEndPath = false;
+        }
+
+        //Direction to next waypoint along the path, position of current waypoint - current position, normalized makes the length 1
+        Vector2 direction = ((Vector2)path.vectorPath[currentWaypoint] - rb.position).normalized;
+
+        //Movement force
+        Vector2 force = direction * speed * Time.deltaTime;
+
+        // If the A.I. detects an enemy further than the stoppingDistance they move toward the enemny
+        if (Vector2.Distance(transform.position, target.position) > stoppingDistance)
+        {
+            //Actually movement
+            rb.AddForce(force);
+        }
+        // If the A.I. detects an enemy within the stopping distance, and outside the retreat the A.I. will stop moving
+        else if (Vector2.Distance(transform.position, target.position) < stoppingDistance && (Vector2.Distance(transform.position, target.position) > retreatDistance))
+        {
+            transform.position = this.transform.position;
+        }
+        //If the A.I. detects an enemy within the retreatDistance it will flee
+        else if (Vector2.Distance(transform.position, target.position) < retreatDistance)
+        {
+            rb.AddForce(-force);
+
+        }
+
+        //Same as the stop moving, but adds in an increment for shooting, so it's not too fast and not across the map
+        if ((timeBetweenShots <= 0) && Vector2.Distance(transform.position, target.position) < (stoppingDistance * 2))
+        {
+
+            RangedAI();
+
+
+            // Instantiate(projectile, firePoint.transform.position, firePoint.transform.rotation);
+            timeBetweenShots = startTimeBetweenShots;
+        }
+        else
+        {
+            timeBetweenShots -= Time.deltaTime;
+        }
+
+
+        //Distance to next waypoint
+        float distance = Vector2.Distance(rb.position, path.vectorPath[currentWaypoint]);
+
+        //If it's within range of the end of the current waypoint then move onto the next waypoint
+        if (distance < nextWaypointDistance)
+        {
+            currentWaypoint++;
+        }
+    }
+
+    //Path generation
+    void UpdatePath()
+    {
+        //Prevents it from updating all the time
+        if (seeker.IsDone())
+            // Starts a new path, using current position, targets position, and the function called
+            seeker.StartPath(rb.position, target.position, OnPathComplete);
+    }
+
+    //Path generation
+    void OnPathComplete(Path p)
+    {
+        if (!p.error)
+        {
+            //Current path equals P
+            path = p;
+            //Resets progress on path back to zero for the next path
+            currentWaypoint = 0;
+        }
+    }
+
+    void RangedAI()
+    {
+        Vector2 direction = target.position - transform.position;
+        direction.Normalize();
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        GameObject arrow = Instantiate(projectile, firePoint.position, Quaternion.Euler(0f, 0f, angle));
+        arrow.GetComponent<Rigidbody2D>().velocity = direction * projectileForce;
+    }
+}

@@ -3,111 +3,94 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using System.IO;
-
+using UnityEngine.UI;
 
 [RequireComponent(typeof(PhotonView))]
+[RequireComponent(typeof(PhotonTransformView))]
 public class NecromancerController : MonoBehaviour
 {
-    public float speed;
+    
     private PhotonView pv;
-    private bool manaIncreasing;
-    public float mana;
-    public float skeletonCost;
-    private float startTime;
-    private bool AtSpawnPoint = false;
-    private string SpawnName;
-    private int SpawnPoint; 
 
-    private NecromancerMana manaMiniBar;
+    public GameObject canvas;
+    public GameObject pauseMenu;
+    public Slider manaSlider;
+    public float cameraSpeed;
+    public float mana;
+    public float maxMana;
+    public float manaRecoveredPerSecond;
+
+    public float skeletonCost;
+    public float goblinCost;
+    public float flyingEyeCost;
+
+    private float startTime;
+
     private Camera camera;
     private Vector2 velocity;
     private Vector2 spawnPosition;
     public GameObject spawnMarker;
+    
 
-    // Start is called before the first frame update
+    public string[] minionPrefabNames;
+    public GameObject[] minionButtons;
+    private float[] minionCosts;
+    private int minionSelected = 0;
+
+
     void Start()
     {
+        /*Load these into an array for easier use*/
+        minionCosts = new float[]{skeletonCost, goblinCost, flyingEyeCost};
+
         pv = GetComponent<PhotonView>();
-        skeletonCost = 2;
-        mana = 100;
         startTime = Time.time;
-        manaIncreasing = true;
+
         camera = GameObject.Find("Main Camera").GetComponent<Camera>();
-        manaMiniBar = (NecromancerMana)GameObject.Find("Mana Bar Mini").GetComponent("NecromancerMana");
-        manaMiniBar.SetMana(mana);
+        canvas.SetActive(true);
+        canvas.GetComponent<Canvas>().worldCamera = camera;
+
+        SetMaxMana();
         markSpawnLocations();
-        
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (pv.IsMine)
         {
             Vector2 input = new Vector2(0,0);
-            input.x = 0;
-            input.y = 0;
 
-            //check for horizontal movement
-            if(KeyBindingManager.GetKey(KeyAction.right) && !KeyBindingManager.GetKey(KeyAction.left))
+            if (!pauseMenu.activeSelf)
             {
-                input.x = 1;
-            }
+                //check for horizontal movement
+                if (KeyBindingManager.GetKey(KeyAction.right)) input.x++;
+                if (KeyBindingManager.GetKey(KeyAction.left)) input.x--;
 
-            if(KeyBindingManager.GetKey(KeyAction.left) && !KeyBindingManager.GetKey(KeyAction.right))
-            {
-                input.x = -1;
-            }
+                //check for vertical movement    
+                if (KeyBindingManager.GetKey(KeyAction.up)) input.y++;
+                if (KeyBindingManager.GetKey(KeyAction.down)) input.y--;
 
-            //check for vertical movement    
-            if(KeyBindingManager.GetKey(KeyAction.up) && !KeyBindingManager.GetKey(KeyAction.down))
-            {
-                input.y = 1;
-            }
-            
-            if(KeyBindingManager.GetKey(KeyAction.down) && !KeyBindingManager.GetKey(KeyAction.up))
-            {
-                input.y = -1;
-            }
-            velocity = input.normalized * speed;
+                velocity = input.normalized * cameraSpeed;
 
-
-            //TODO: Replace this with UI button after spawn positions have been implemented
-            if (KeyBindingManager.GetKeyDown(KeyAction.fire1))
-            {
-                //TODO: Update this so it can be preset instead of just reading the mouse position
-                spawnPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                RaycastHit2D hit = Physics2D.Raycast(spawnPosition, Vector2.zero);
-                
-                if(hit.collider == null){
-                    AtSpawnPoint = false;
-                }
-                else if(hit.collider.tag == "Spawn Point"){
-                    Debug.Log("Clicking spawn point");
-                    SpawnSkeleton(spawnPosition);
-                    AtSpawnPoint = true;
-                }
-            }
-
-            if (manaIncreasing)
-            {
-                if (mana < 100)
+                if (KeyBindingManager.GetKeyDown(KeyAction.fire1))
                 {
-                    mana = Mathf.Min(mana + 4*(Time.time - startTime), 100);
-                    startTime = Time.time;
-                    manaMiniBar.SetMana(mana);
-                }
-                else
-                {
-                    manaIncreasing = false;
+                    spawnPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                    RaycastHit2D hit = Physics2D.Raycast(spawnPosition, Vector2.zero);
+
+                    if (hit.collider != null && hit.collider.tag == "Spawn Point") SpawnMinion(spawnPosition);
                 }
             }
+
+            if (KeyBindingManager.GetKeyDown(KeyAction.pause)) pauseMenu.SetActive(!pauseMenu.activeSelf);
+
+            if (mana < maxMana) RecoverMana();
+            startTime = Time.time;
         }
 
     }
     private void FixedUpdate()
     {
-        camera.transform.Translate(velocity * speed * Time.fixedDeltaTime);
+        camera.transform.Translate(velocity * Time.fixedDeltaTime);
     }
 
     /// <summary>
@@ -122,24 +105,47 @@ public class NecromancerController : MonoBehaviour
         }
     }
 
-    //TODO: Add additional methods for all minions
-
     /// <summary>
-    /// Spawns a new Skeleton minion at the given position.
+    /// Spawns the currently selected minion at the given position.
     /// </summary>
     /// <param name="spawnPosition">A Vector2 position for the minion to be spawned.</param>
-    private void SpawnSkeleton(Vector2 spawnPosition)
+    private void SpawnMinion(Vector2 spawnPosition)
     {
-        if (mana >= skeletonCost)
+        if (mana >= minionCosts[minionSelected])
         {
-            if(AtSpawnPoint){
-                mana -= skeletonCost;
-                //manaBar.SetMana(mana);
-                startTime = Time.time;
-                manaIncreasing = true;
-                GameObject skeleton = PhotonNetwork.Instantiate(Path.Combine("PhotonPrefabs", "PhotonSkeleton"), spawnPosition, Quaternion.identity);
-                AtSpawnPoint = false;
-            }
+            mana -= minionCosts[minionSelected];
+            manaSlider.value = mana;
+            startTime = Time.time;
+            PhotonNetwork.Instantiate(Path.Combine("PhotonPrefabs", minionPrefabNames[minionSelected]), spawnPosition, Quaternion.identity);
         }
+    }
+
+    /// <summary>
+    /// Increase mana based off of time passed.
+    /// </summary>
+    public void RecoverMana()
+    {
+        mana += manaRecoveredPerSecond * (Time.time - startTime);
+        if (mana > maxMana) mana = maxMana;
+   
+        manaSlider.value = mana;
+    }
+
+    /// <summary>
+    /// Set the max value of the mana bar.
+    /// </summary>
+    public void SetMaxMana()
+    {
+        manaSlider.maxValue = maxMana;
+        manaSlider.value = mana;
+    }
+
+    /// <summary>
+    /// Changes the minionSelected to the given selection.
+    /// </summary>
+    /// <param name="selection">Index of the selected minion in the minionPrefabNames array.</param>
+    public void SelectMinion(int selection)
+    {
+        minionSelected = selection;
     }
 }

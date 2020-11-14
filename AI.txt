@@ -1,0 +1,110 @@
+using UnityEngine;
+using Pathfinding;
+using System.Collections;
+using System.Collections.Generic;
+using Photon.Pun;
+
+public class AI : MonoBehaviour
+{
+    public float speed = 0.2f;
+    private Rigidbody2D rb;
+
+    //Target
+    private Transform target;
+
+    //How close the A.I. needs to be before it moves to the next way point
+    public float nextWaypointDistance = 3f;
+
+    //Current path that we are following
+    Path path;
+
+    // Current waypoint along the path it's on
+    int currentWaypoint = 0;
+
+    //if we reached the end of the path
+    bool reachedEndPath = false;
+    Seeker seeker;
+
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        rb = GetComponent<Rigidbody2D>();
+        seeker = GetComponent<Seeker>();
+
+        //Updates the path to follow and target different enemies, functions called, time to wait to call, then the repeat rate
+        InvokeRepeating("UpdatePath", 0f, .5f);
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        
+    }
+
+    private void FixedUpdate()
+    {
+        if (gameObject.tag == "Enemy")
+        {
+            target = GameObject.FindGameObjectWithTag("Player").transform;
+        }
+        else
+        {
+            target = GameObject.FindGameObjectWithTag("Enemy").transform;
+        }
+
+        //Checks to see if there's a path
+        if (path == null)
+            return;
+
+        //If we reached the goal then stop moving. 
+        if (currentWaypoint >= path.vectorPath.Count)
+        {
+            reachedEndPath = true;
+            return;
+        }
+        else
+        {
+            reachedEndPath = false;
+        }
+
+        //Direction to next waypoint along the path, position of current waypoint - current position, normalized makes the length 1
+        Vector2 direction = ((Vector2)path.vectorPath[currentWaypoint] - rb.position).normalized;
+
+        //Movement force
+        Vector2 force = direction * speed * Time.deltaTime;
+
+        //Actually movement
+        rb.AddForce(force);
+
+        //Distance to next waypoint
+        float distance = Vector2.Distance(rb.position, path.vectorPath[currentWaypoint]);
+
+        //If it's within range of the end of the current waypoint then move onto the next waypoint
+        if (distance < nextWaypointDistance)
+        {
+            currentWaypoint++;
+        }
+    }
+
+    //Path generation
+    void UpdatePath()
+    {
+        //Prevents it from updating all the time
+        if (seeker.IsDone())
+            // Starts a new path, using current position, targets position, and the function called
+            seeker.StartPath(rb.position, target.position, OnPathComplete);
+    }
+
+    //Path generation
+    void OnPathComplete(Path p)
+    {
+        if (!p.error)
+        {
+            //Current path equals P
+            path = p;
+            //Resets progress on path back to zero for the next path
+            currentWaypoint = 0;
+        }
+    }
+}

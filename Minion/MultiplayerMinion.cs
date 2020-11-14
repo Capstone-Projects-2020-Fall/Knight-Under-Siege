@@ -21,10 +21,14 @@ public abstract class MultiplayerMinion : MonoBehaviour
 
     private bool facingRight = true;
     private float prevX;
-    
+
+    /*Status Effects*/
+    private bool frozen = false;
+
 
     public void Start()
     {
+
         speedScalar = Convert.ToSingle(PhotonNetwork.CurrentRoom.CustomProperties["Minion Speed"]);
         prevX = transform.position.x;
         FindAllTargets();
@@ -33,6 +37,7 @@ public abstract class MultiplayerMinion : MonoBehaviour
 
     public void FixedUpdate()
     {
+        if (frozen) return;
 
         GameObject currentTarget = PickTarget();
         if (currentTarget == null) return;
@@ -129,6 +134,21 @@ public abstract class MultiplayerMinion : MonoBehaviour
     }
 
     /// <summary>
+    /// Adds the frozen condition to this minion and turns them blue until the duration has ended.
+    /// </summary>
+    /// <param name="freezeDuration">The time in seconds for the frozen effect to last.</param>
+    IEnumerator Freeze(float freezeDuration)
+    {
+        frozen = true; //you have to let it go
+        GetComponent<SpriteRenderer>().color = Color.blue; //da ba dee
+
+        yield return new WaitForSeconds(freezeDuration);
+
+        frozen = false;
+        GetComponent<SpriteRenderer>().color = Color.white;
+    }
+
+    /// <summary>
     /// Flip the character along the x-axis so they face the opposite direction.
     /// </summary>
     private void flip()
@@ -148,5 +168,12 @@ public abstract class MultiplayerMinion : MonoBehaviour
         GameObject collidingObject = collision.gameObject;
         
         if (collidingObject.CompareTag("Projectile")) takeDamage(collidingObject.GetComponent<Projectile>().damage);
+
+        if (collidingObject.CompareTag("Blizzard"))
+        {
+            takeDamage(collidingObject.GetComponent<Blizzard>().damage);
+            if (!frozen) Freeze(collidingObject.GetComponent<Blizzard>().freezeDuration);
+
+        }
     }
 }
