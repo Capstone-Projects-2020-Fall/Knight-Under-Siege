@@ -92,12 +92,21 @@ public class QuickStartLobbyController : MonoBehaviourPunCallbacks
                 ht.Add("Host", "Blank Name");
             }
             Debug.Log("Host: " + (ht["Host"] as string));
+
+			ht.Add("Max Players", 4);
+            Debug.Log("Max Players: " + (ht["Max Players"].ToString()));
             
             ht.Add("Timer Length", 600);
             Debug.Log("Timer Length: " + (ht["Timer Length"].ToString()));
             
             ht.Add("Friendly Fire", false);
             Debug.Log("Friendly Fire: " + (ht["Friendly Fire"].ToString()));
+            
+            ht.Add("Player Health", 5);
+            Debug.Log("Player Health: " + (ht["Player Health"].ToString()));
+            
+            ht.Add("Minion Speed", 1);
+            Debug.Log("Minion Speed: " + (ht["Minion Speed"].ToString()));
             
             roomOps.CustomRoomProperties = ht;
 

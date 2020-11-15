@@ -35,7 +35,6 @@ public class RoomListCreator : MonoBehaviourPunCallbacks
     
     public void MakeList(List<RoomInfo> roomList)
     {
-        Debug.Log("we're here");
         foreach (Transform child in content.transform)
         {
             GameObject.Destroy(child.gameObject);
@@ -43,7 +42,7 @@ public class RoomListCreator : MonoBehaviourPunCallbacks
         foreach(RoomInfo roomInfo in roomList)
         {
             Debug.Log("room found");
-            if (roomInfo.IsOpen)
+            if (roomInfo.IsOpen && roomInfo.PlayerCount > 0 && roomInfo.PlayerCount < roomInfo.MaxPlayers)
             {
                 GameObject newRoom = (GameObject) Instantiate(room);
                 RoomDetails roomDetails = newRoom.GetComponent(typeof(RoomDetails)) as RoomDetails;

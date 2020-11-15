@@ -10,7 +10,7 @@ using UnityEngine.UI;
 public class NecromancerController : MonoBehaviour
 {
     
-    private PhotonView pv;
+    public PhotonView pv;
 
     public GameObject canvas;
     public GameObject pauseMenu;
@@ -47,11 +47,17 @@ public class NecromancerController : MonoBehaviour
         startTime = Time.time;
 
         camera = GameObject.Find("Main Camera").GetComponent<Camera>();
-        canvas.SetActive(true);
+        
         canvas.GetComponent<Canvas>().worldCamera = camera;
 
         SetMaxMana();
-        markSpawnLocations();
+        
+
+        if (pv.IsMine)
+        {
+            canvas.SetActive(true);
+            markSpawnLocations();
+        }
     }
 
     void Update()
@@ -91,6 +97,22 @@ public class NecromancerController : MonoBehaviour
     private void FixedUpdate()
     {
         camera.transform.Translate(velocity * Time.fixedDeltaTime);
+    }
+    
+    [PunRPC]
+    private void RPC_NecromancerWin()
+    {
+        Debug.Log("necromancer win method called");
+        PlayerPrefs.SetInt("HeroesWin", 0);
+        PhotonNetwork.LoadLevel("EndScreen");
+    }
+    
+    [PunRPC]
+    private void RPC_HeroWin()
+    {
+        Debug.Log("hero win method called");
+        PlayerPrefs.SetInt("HeroesWin", 1);
+        PhotonNetwork.LoadLevel("EndScreen");
     }
 
     /// <summary>
@@ -141,11 +163,15 @@ public class NecromancerController : MonoBehaviour
     }
 
     /// <summary>
-    /// Changes the minionSelected to the given selection.
+    /// Changes the minion selected to the given selection.
     /// </summary>
     /// <param name="selection">Index of the selected minion in the minionPrefabNames array.</param>
     public void SelectMinion(int selection)
     {
         minionSelected = selection;
+
+        foreach (GameObject border in minionButtons) border.SetActive(false);
+
+        minionButtons[minionSelected].SetActive(true);
     }
 }

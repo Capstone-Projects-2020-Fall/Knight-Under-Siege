@@ -1,9 +1,11 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using Photon.Pun;
+using Photon.Realtime;
 
 public class ControlsMenu : MonoBehaviour
 {
@@ -31,6 +33,22 @@ public class ControlsMenu : MonoBehaviour
             else
             {
                 setActiveFalse();
+                if (SceneManager.GetActiveScene().name == "Room")
+                {
+                    Room room = PhotonNetwork.CurrentRoom;
+                    room.MaxPlayers = (byte) Convert.ToInt32(room.CustomProperties["Max Players"]);
+                    int i = 0;
+                    foreach (KeyValuePair<int, Player> playerInfo in room.Players)
+                    {
+                        if (i >= (int) room.MaxPlayers)
+                        {
+                            Debug.Log("Player should be kicked out.");
+                            PhotonNetwork.CloseConnection(playerInfo.Value);
+                        }
+
+                        i++;
+                    }
+                }
             }
         }
     }
