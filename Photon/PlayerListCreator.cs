@@ -58,6 +58,8 @@ public class PlayerListCreator : MonoBehaviourPunCallbacks
             GameObject newPlayer = (GameObject) Instantiate(player);
             PlayerDetails playerDetails = newPlayer.GetComponent(typeof(PlayerDetails)) as PlayerDetails;
             playerDetails.name.text = playerInfo.Value.NickName;
+            playerDetails.id = playerInfo.Key;
+            playerDetails.player = playerInfo.Value;
             if (playerInfo.Value.IsMasterClient)
             {
                 playerDetails.name.color = Color.blue;

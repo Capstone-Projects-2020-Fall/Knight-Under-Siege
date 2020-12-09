@@ -42,8 +42,11 @@ public class CountdownTimer : MonoBehaviour
                 timerIsRunning = false;
                 if (SceneManager.GetActiveScene().name != "SingleplayerGame")
                 {
-                    PlayerPrefs.SetInt("HeroesWin", 1);
-                    PhotonNetwork.LoadLevel("EndScreen");
+                    GameObject necromancer = GameObject.FindGameObjectWithTag("Necromancer");
+                    NecromancerController nc = necromancer.GetComponent(typeof(NecromancerController)) as NecromancerController;
+                    PhotonView nv = nc.pv;
+                    Debug.Log("heroes win");
+                    nv.RPC("RPC_HeroWin", RpcTarget.All);
                 }
                 else
                 {

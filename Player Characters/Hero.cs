@@ -13,7 +13,7 @@ public class Hero : MonoBehaviour
     public float mana;
     private HeroHealth healthBar;
     private HeroHealth miniHealthBar;
-    private PhotonView pv;
+    public PhotonView pv;
 
 
 
@@ -38,13 +38,6 @@ public class Hero : MonoBehaviour
         maxHealth = health;
 
     }
-    
-    [PunRPC]
-    private void RPC_NecromancerWin()
-    {
-        PlayerPrefs.SetInt("HeroesWin", 0);
-        PhotonNetwork.LoadLevel("EndScreen");
-    }
 
     /// <summary>
     /// Adjust the characters health according to the amount of damage taken
@@ -61,12 +54,15 @@ public class Hero : MonoBehaviour
             PhotonNetwork.Destroy(gameObject);
             if (GameObject.FindGameObjectWithTag("Player") == null)
             {
+                GameObject necromancer = GameObject.FindGameObjectWithTag("Necromancer");
+                NecromancerController nc = necromancer.GetComponent(typeof(NecromancerController)) as NecromancerController;
+                PhotonView nv = nc.pv;
                 Debug.Log("necromancer wins");
-                pv.RPC("RPC_NecromancerWin", RpcTarget.All);
+                nv.RPC("RPC_NecromancerWin", RpcTarget.All);
             }
             else
             {
-                Debug.Log("why");
+                Debug.Log("Players still remaining");
             }
 
         }
@@ -80,11 +76,17 @@ public class Hero : MonoBehaviour
         priority = 1 - (priorityRange * health / maxHealth);
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.CompareTag("Enemy") || (FriendlyFire && collision.gameObject.CompareTag("Projectile")))
+        if (collision.gameObject.CompareTag("Enemy Attack") || (FriendlyFire && collision.gameObject.CompareTag("Projectile")))
         {
-          takeDamage(1);
+            if (collision.gameObject.CompareTag("Enemy Attack")) {
+                takeDamage(collision.gameObject.GetComponent<EnemyDamage>().damage);
+            }
+            else
+            {
+                takeDamage(collision.gameObject.GetComponent<Projectile>().damage);
+            }
         }
     }
 }
